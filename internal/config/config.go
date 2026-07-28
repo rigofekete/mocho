@@ -17,12 +17,14 @@ type Config struct {
 }
 
 // DefaultWikiPath is ~/Work/dev/mocho-wiki (independent of the app repo).
-func DefaultWikiPath() string {
+func DefaultWikiPath() (string, error) {
 	home, err := os.UserHomeDir()
-	if err != nil || home == "" {
-		return "mocho-wiki"
+	if err != nil {
+		return "", err
+	} else if home == "" {
+		return "", errors.New("home path not found")
 	}
-	return filepath.Join(home, "Work", "dev", "mocho-wiki")
+	return filepath.Join(home, "Work", "dev", "mocho-wiki"), nil
 }
 
 // configFile returns the path to the user config file, if any.
@@ -60,8 +62,12 @@ func loadFile(path string, cfg *Config) error {
 // values are non-empty only when the user actually set them; empty flags defer
 // to the next layer down.
 func Resolve(flagWiki, flagAddr string) (Config, error) {
+	wikiPath, err := DefaultWikiPath()
+	if err != nil {
+		return Config{}, err
+	}
 	cfg := Config{
-		WikiPath: DefaultWikiPath(),
+		WikiPath: wikiPath,
 		Addr:     "127.0.0.1:7777",
 	}
 	if path := configFile(); path != "" {

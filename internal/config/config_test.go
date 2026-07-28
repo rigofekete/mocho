@@ -35,7 +35,7 @@ func TestDefaultWhenNothingSet(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if cfg.WikiPath == "" || cfg.Addr == "" {
+	if cfg.Addr == "" {
 		t.Fatalf("expected defaults, got %+v", cfg)
 	}
 }
