@@ -22,7 +22,7 @@ func DefaultWikiPath() (string, error) {
 	if err != nil {
 		return "", err
 	} else if home == "" {
-		return "", errors.New("home path not found")
+		return "", errors.New("$HOME env not set")
 	}
 	return filepath.Join(home, "Work", "dev", "mocho-wiki"), nil
 }
