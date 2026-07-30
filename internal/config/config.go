@@ -12,9 +12,18 @@ import (
 
 // Config holds runtime settings.
 type Config struct {
-	WikiPath string `json:"wikiPath"`
-	Addr     string `json:"addr"`
+	WikiPath   string `json:"wikiPath"`
+	Addr       string `json:"addr"`
+	LightModel string `json:"lightModel"`
+	WikiModel  string `json:"wikiModel"`
 }
+
+// DefaultLightModel is the cheap/free model used for read-only light lookups.
+const DefaultLightModel = "opencode/big-pickle"
+
+// DefaultWikiModel is empty by default: an empty model tells opencode run to
+// use the user's configured daily driver. Override via config/env/flag.
+const DefaultWikiModel = ""
 
 // DefaultWikiPath is ~/Work/dev/mocho-wiki (independent of the app repo).
 func DefaultWikiPath() (string, error) {
@@ -67,8 +76,10 @@ func Resolve(flagWiki, flagAddr string) (Config, error) {
 		return Config{}, err
 	}
 	cfg := Config{
-		WikiPath: wikiPath,
-		Addr:     "127.0.0.1:7777",
+		WikiPath:   wikiPath,
+		Addr:       "127.0.0.1:7777",
+		LightModel: DefaultLightModel,
+		WikiModel:  DefaultWikiModel,
 	}
 	if path := configFile(); path != "" {
 		if err := loadFile(path, &cfg); err != nil {
@@ -80,6 +91,12 @@ func Resolve(flagWiki, flagAddr string) (Config, error) {
 	}
 	if v := os.Getenv("MOCHO_ADDR"); v != "" {
 		cfg.Addr = v
+	}
+	if v := os.Getenv("MOCHO_LIGHT_MODEL"); v != "" {
+		cfg.LightModel = v
+	}
+	if v := os.Getenv("MOCHO_WIKI_MODEL"); v != "" {
+		cfg.WikiModel = v
 	}
 	if flagWiki != "" {
 		cfg.WikiPath = flagWiki

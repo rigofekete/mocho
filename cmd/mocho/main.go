@@ -8,7 +8,9 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/rigofekete/mocho/internal/agent"
 	"github.com/rigofekete/mocho/internal/config"
+	"github.com/rigofekete/mocho/internal/ingest"
 	"github.com/rigofekete/mocho/internal/server"
 	"github.com/rigofekete/mocho/internal/wiki"
 )
@@ -32,7 +34,9 @@ func main() {
 		}
 	}
 
-	app := server.New(w)
+	app := server.New(w).WithIngest(
+		ingest.New(cfg.WikiPath, agent.Opencode{}, cfg.WikiModel),
+	)
 	fmt.Printf("mocho serving http://%s (wiki: %s)\n", cfg.Addr, cfg.WikiPath)
 	if err := http.ListenAndServe(cfg.Addr, app.Handler()); err != nil {
 		log.Fatalf("serve: %v", err)

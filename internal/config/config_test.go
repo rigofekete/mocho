@@ -1,7 +1,6 @@
 package config_test
 
 import (
-	"encoding/json"
 	"os"
 	"path/filepath"
 	"testing"
@@ -54,8 +53,7 @@ func TestEnvOverridesDefault(t *testing.T) {
 
 func TestConfigFileOverridesDefault(t *testing.T) {
 	dir := withXDG(t)
-	body, _ := json.Marshal(map[string]string{"wikiPath": "/tmp/file-wiki", "addr": "127.0.0.1:9999"})
-	writeFile(t, filepath.Join(dir, "mocho", "config.json"), string(body))
+	writeFile(t, filepath.Join(dir, "mocho", "config.json"), `{"wikiPath": "/tmp/file-wiki", "addr": "127.0.0.1:9999"}`)
 	t.Setenv("MOCHO_WIKI", "")
 	cfg, err := config.Resolve("", "")
 	if err != nil {
@@ -92,5 +90,73 @@ func TestFlagWins(t *testing.T) {
 	}
 	if cfg.WikiPath != "/tmp/flag-wiki" {
 		t.Fatalf("flag should win: %+v", cfg)
+	}
+}
+
+func TestDefaultModels(t *testing.T) {
+	withXDG(t)
+	t.Setenv("MOCHO_LIGHT_MODEL", "")
+	t.Setenv("MOCHO_WIKI_MODEL", "")
+	cfg, err := config.Resolve("", "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if cfg.LightModel != config.DefaultLightModel {
+		t.Fatalf("light model = %q, want default %q", cfg.LightModel, config.DefaultLightModel)
+	}
+	if cfg.WikiModel != config.DefaultWikiModel {
+		t.Fatalf("wiki model = %q, want default %q", cfg.WikiModel, config.DefaultWikiModel)
+	}
+}
+
+func TestModelEnvOverrides(t *testing.T) {
+	withXDG(t)
+	t.Setenv("MOCHO_LIGHT_MODEL", "opencode/cheap")
+	t.Setenv("MOCHO_WIKI_MODEL", "opencode/frontier")
+	cfg, err := config.Resolve("", "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if cfg.LightModel != "opencode/cheap" {
+		t.Fatalf("light model = %q", cfg.LightModel)
+	}
+	if cfg.WikiModel != "opencode/frontier" {
+		t.Fatalf("wiki model = %q", cfg.WikiModel)
+	}
+}
+
+func TestModelConfigFileOverrides(t *testing.T) {
+	dir := withXDG(t)
+	writeFile(t, filepath.Join(dir, "mocho", "config.json"),
+		`{"wikiPath":"/tmp/file-wiki","lightModel":"opencode/file-light","wikiModel":"opencode/file-wiki"}`)
+	t.Setenv("MOCHO_LIGHT_MODEL", "")
+	t.Setenv("MOCHO_WIKI_MODEL", "")
+	cfg, err := config.Resolve("", "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if cfg.LightModel != "opencode/file-light" {
+		t.Fatalf("light model = %q", cfg.LightModel)
+	}
+	if cfg.WikiModel != "opencode/file-wiki" {
+		t.Fatalf("wiki model = %q", cfg.WikiModel)
+	}
+}
+
+func TestModelEnvOverridesConfigFile(t *testing.T) {
+	dir := withXDG(t)
+	writeFile(t, filepath.Join(dir, "mocho", "config.json"),
+		`{"wikiPath":"/tmp/file-wiki","lightModel":"opencode/file-light","wikiModel":"opencode/file-wiki"}`)
+	t.Setenv("MOCHO_LIGHT_MODEL", "opencode/env-light")
+	cfg, err := config.Resolve("", "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if cfg.LightModel != "opencode/env-light" {
+		t.Fatalf("env should win over file: %q", cfg.LightModel)
+	}
+	// wiki model not overridden by env keeps config file value.
+	if cfg.WikiModel != "opencode/file-wiki" {
+		t.Fatalf("wiki model should keep file value: %q", cfg.WikiModel)
 	}
 }
