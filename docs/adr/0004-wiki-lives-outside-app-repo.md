@@ -1,0 +1,3 @@
+# The wiki lives in its own repository, outside the app
+
+The wiki (raw sources, pages, index, log, schema) lives in a separate directory — default `~/Work/dev/mocho-wiki` — as its own git repository, not inside the mocho app repo. Colocating was rejected because study content and app tooling have different lifecycles and audiences: the wiki must be usable by any agent session independent of the app, versioned without app-commit noise, and disposable/re-clonable without touching code. Consequences: mocho needs wiki-path configuration (flag/env/config), scaffolding an empty wiki is a first-class app behavior, and the wiki repo is not a build input — the app treats it as runtime data.

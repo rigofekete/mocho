@@ -1,0 +1,3 @@
+# Go owns acquisition and the raw layer; the agent only synthesizes
+
+mocho splits every operation at the same boundary: the Go backend performs all acquisition (source adapters) and all writes to the raw layer, while the agent performs only synthesis (raw → wiki pages, index, log) and query/lint reasoning. The alternative — letting the agent fetch sources and write raw itself — was rejected because the pattern requires raw to be immutable and trustworthy; deterministic Go code is testable and auditable, agent behavior is not. This also keeps provenance exact and lets adapters evolve without touching prompts. The cost — writing acquisition code per source type — is accepted deliberately.

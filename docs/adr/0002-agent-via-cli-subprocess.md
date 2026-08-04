@@ -1,0 +1,3 @@
+# Agent capabilities via external CLI subprocess, not direct API integration
+
+mocho never calls an LLM API directly; it spawns an agent CLI (`opencode run` by default) as a subprocess with the wiki as working directory, behind an `AgentBackend` interface. Direct API integration was rejected: it would mean key management, provider lock-in, and reimplementing tool use that agent CLIs already have. The subprocess approach keeps mocho model-agnostic (the model is the CLI's config, not mocho's code), lets any agent session work on the same wiki manually, and dogfoods the tool the user already runs daily. Consequences: mocho inherits the CLIs' invocation quirks (streaming formats, permission flags), and a Claude Code adapter is deferred but admitted by the interface.
