@@ -36,7 +36,54 @@ go run ./cmd/mocho -wiki ~/my-wiki -addr 127.0.0.1:7777
 MOCHO_WIKI=~/my-wiki go run ./cmd/mocho
 ```
 
-Then open http://127.0.0.1:7777.
+Then open <http://127.0.0.1:7777>.
+
+### Using the wiki
+
+The wiki is a plain directory of Markdown. It defaults to
+`~/Work/dev/mocho-wiki` (override with `-wiki` / `MOCHO_WIKI`). On first run
+with an empty directory, mocho scaffolds this layout:
+
+```
+AGENTS.md  agent conventions for the wiki (read this)
+index.md   page catalog — your table of contents
+log.md     append-only operation log
+raw/       immutable ingested sources
+concepts/  one .md per idea
+courses/   one hub .md per course
+```
+
+Latest functional state: manual page authoring and source ingestion. Query and
+lint operations are not wired into the app yet.
+
+#### Add a page manually
+
+1. Create `concepts/<slug>.md` with an H1 at the top:
+   ```markdown
+   # Goroutines
+
+   Lightweight concurrent execution units.
+   ```
+2. Append a catalog entry to `index.md`:
+   ```
+   - [Goroutines](concepts/goroutines.md) — lightweight concurrent execution units
+   ```
+3. Refresh <http://127.0.0.1:7777> in the browser.
+
+#### Ingest a source
+
+Requires the `opencode` CLI on your `$PATH`.
+
+```sh
+curl -X POST http://127.0.0.1:7777/api/ingest \
+  -H 'Content-Type: application/json' \
+  -d '{"path":"/path/to/your-source.md"}'
+```
+
+The response is a Server-Sent Events stream. mocho copies the source into
+`raw/` verbatim (immutable, never modified afterward), then `opencode` reads
+`raw/` + `AGENTS.md` and synthesizes concept/course pages, updates `index.md`,
+and appends an entry to `log.md`.
 
 ### Frontend dev
 
@@ -51,6 +98,7 @@ go run ./cmd/mocho -addr 127.0.0.1:7777
 - `GET /api/health` — `{ "ok": true }`
 - `GET /api/pages` — `{ "pages": [{ "name","title","summary" }] }` (from `index.md`)
 - `GET /api/pages/{name}` — `{ "name","title","markdown" }`
+- `POST /api/ingest` — `{ "path" }`, streams ingest progress as SSE
 
 ### Test
 
