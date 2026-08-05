@@ -88,7 +88,7 @@ Requires the `opencode` CLI on your `$PATH`.
 ```sh
 curl -X POST http://127.0.0.1:7777/api/ingest \
   -H 'Content-Type: application/json' \
-  -d '{"source":"/path/to/your-source.md"}'
+  -d '{"path":"/path/to/your-source.md"}'
 ```
 
 The response is a Server-Sent Events stream showing agent progress live.
@@ -102,7 +102,7 @@ Everything the app does is reproducible by hand — the wiki is agent-neutral:
 mkdir -p ~/Work/dev/mocho-wiki/raw/my-source
 cp /path/to/your-source.md ~/Work/dev/mocho-wiki/raw/my-source/
 cat > ~/Work/dev/mocho-wiki/raw/my-source.json <<'EOF'
-{"source": "/path/to/your-source.md", "type": "local", "fetchedAt": "2026-08-05T12:00:00Z"}
+{"path": "/path/to/your-source.md", "type": "local", "fetchedAt": "2026-08-05T12:00:00Z"}
 EOF
 
 # 2. Ask any agent CLI to synthesize it, from the wiki root
