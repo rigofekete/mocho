@@ -49,7 +49,7 @@ func configFile() string {
 	return filepath.Join(dir, "mocho", "config.json")
 }
 
-// loadFile reads the config file into cfg if it exists. Missing is not an error.
+// loadFile reads the config file into cfg if it exists.
 func loadFile(path string, cfg *Config) error {
 	if path == "" {
 		return nil
