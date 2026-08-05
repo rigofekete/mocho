@@ -17,13 +17,17 @@ _Avoid_: source file, import, dump
 **Provenance**:
 The metadata linking a raw source to where it came from: origin URL or path, source type, acquisition time.
 
+**Wiki page**:
+A single markdown file in the wiki — the unit the user studies from. The two page types in v1 are concept page and course page. Wiki pages are interconnected by markdown links and cataloged in the index.
+_Avoid_: page (use the base term), doc
+
 **Concept page**:
-An atomic wiki page about one idea, heavily interlinked to other pages. The primary page type of the wiki.
+A wiki page about one atomic idea, heavily interlinked to other wiki pages. The universal page type — every source produces these. A concept may be linked from many course pages; concepts are not owned by any course.
 _Avoid_: topic page, note
 
-**Course hub**:
-A wiki page per course holding per-lesson sections in course order and linking the concepts extracted from each lesson. There are no separate lesson pages.
-_Avoid_: course page, lesson page
+**Course page**:
+A wiki page created only for course-shaped sources (raw sources whose provenance declares an ordered lesson list): it lists the source's lessons in order as sections and links the concept pages drawn from each. One-off sources (articles, single documents) produce concept pages only. There are no per-lesson pages.
+_Avoid_: course hub, lesson page
 
 **Index**:
 The catalog of all wiki pages, maintained as part of every wiki-writing operation. Enables navigation without search infrastructure.
