@@ -1,4 +1,4 @@
-import { createCliRenderer, SyntaxStyle } from "@opentui/core"
+import { createCliRenderer, SyntaxStyle, type ImageRenderProtocol } from "@opentui/core"
 import { createRoot, useKeyboard } from "@opentui/react"
 import { useEffect, useState } from "react"
 import { Jimp, type JimpInstance } from "jimp"
@@ -181,6 +181,8 @@ function App() {
   const [searchFocused, setSearchFocused] = useState(false)
   const [mode, setMode] = useState<ViewMode>("browse")
   const [graph, setGraph] = useState<Uint8Array | null>(null)
+  const [graphError, setGraphError] = useState<string | null>(null)
+  const [protocol, setProtocol] = useState<ImageRenderProtocol>("blocks")
 
   useEffect(() => {
     listPages(BASE_URL)
@@ -191,8 +193,11 @@ function App() {
       })
       .catch((e) => setStatus(`err: ${(e as Error).message}`))
     renderGraphPng()
-      .then(setGraph)
-      .catch(() => setGraph(null))
+      .then((png) => {
+        setGraph(png)
+        setGraphError(null)
+      })
+      .catch((e) => setGraphError((e as Error).message))
   }, [])
 
   useEffect(() => {
@@ -231,6 +236,8 @@ function App() {
       setSearchFocused(true)
     } else if (key.name === "g") {
       setMode((m) => (m === "graph" ? "browse" : "graph"))
+    } else if (key.name === "p") {
+      setProtocol((p) => (p === "auto" ? "blocks" : p === "blocks" ? "kitty" : p === "kitty" ? "sixel" : "auto"))
     } else if (key.name === "up" || key.name === "k") {
       setSelected((i) => Math.max(0, i - 1))
     } else if (key.name === "down" || key.name === "j") {
@@ -241,7 +248,7 @@ function App() {
   return (
     <box flexDirection="column" padding={1} flexGrow={1}>
       <text fg={COLOR_ACCENT} flexShrink={0}>
-        mocho — OpenTUI react spike (g: graph, /: search, j/k: move, q: quit)
+        mocho — OpenTUI react spike (g: graph, p: image proto, /: search, j/k: move, q: quit)
       </text>
       <box border borderStyle="single" borderColor={COLOR_MUTED} height={3} paddingX={1} flexShrink={0}>
         <input
@@ -291,7 +298,9 @@ function App() {
         >
           {mode === "graph" ? (
             graph ? (
-              <image source={graph} fit="fit" protocol="auto" style={{ width: "100%", height: "100%" }} />
+              <image source={graph} fit="fit" protocol={protocol} style={{ width: "100%", height: "100%" }} />
+            ) : graphError ? (
+              <text fg={COLOR_SELECTED}>graph failed: {graphError}</text>
             ) : (
               <text fg={COLOR_MUTED}>generating graph…</text>
             )
@@ -302,6 +311,7 @@ function App() {
       </box>
       <text fg={COLOR_MUTED} flexShrink={0}>
         {status}
+        {mode === "graph" ? `  [image protocol: ${protocol}]` : ""}
       </text>
     </box>
   )

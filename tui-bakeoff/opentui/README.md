@@ -56,14 +56,19 @@ executable (tested from a clean dir with no `node_modules`).
 - `/` — focus the search filter; typing filters the list by title/name/summary
 - `enter` — leave the search filter
 - `g` — toggle the graph view (renders a generated PNG of the wiki network)
+- `p` — cycle the image protocol: `blocks` (default, works in any terminal) →
+  `kitty` → `sixel` → `auto`. True pixel rendering (kitty/sixel) needs a
+  supporting terminal (kitty, ghostty, wezterm, recent alacritty); `blocks`
+  always works. The active protocol shows in the status bar.
 - `q` / `ctrl+c` — quit
 
 ## Rendering
 
 - Pages render with `<markdown>` (`MarkdownRenderable`): tree-sitter syntax
   highlighting (GitHub-dark theme), OSC8 hyperlinks for interlinks, tables.
-- Graph view renders a jimp-generated PNG via `<image>` — `protocol="auto"` picks
-  kitty/sixel where available, else unicode blocks.
+- Graph view renders a jimp-generated PNG via `<image>`. It defaults to the
+  `blocks` protocol so it is visible in any terminal; `p` cycles to kitty/sixel
+  for true pixels where the terminal supports them.
 - The API client is decoupled from the UI (`src/client.ts`) and TDD'd against a
   `Bun.serve` stub.
 
