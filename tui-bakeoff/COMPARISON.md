@@ -53,45 +53,35 @@ the list, and render the selected page's markdown. Concrete run evidence:
 | **Single-binary Go story** | **Ships inside the mocho binary as `mocho tui`** — zero extra runtime, matches the PRD's "one self-contained binary" goal. | Requires **bun installed**; TUI is a separate frontend process speaking to the API. Breaks the single-binary deployment story. |
 | **Maintenance / community momentum** | Charm ecosystem is large, mature, stable, broadly used, long track record. | Younger (0.4.x), single-org stewardship (anomalyco/opencode), fast-moving, smaller community, likely breaking changes; but powers opencode in production (good signal). |
 
-## Decision: OpenTUI
+## Recommendation: Bubbletea (decision pending)
 
-**Decision (made):** go forward with **OpenTUI**. The Bubbletea prototype is **kept**
-in `bubbletea/` as a backup / for potential later use — **not** deleted.
+> Both prototypes are kept in this tree so the decision is yours to make. The notes
+> below are a *recommendation*, not a done deal.
 
-Why: OpenTUI's `MarkdownRenderable` (tree-sitter syntax highlighting, OSC8
-hyperlinks, auto-aligning tables, themes, built-in streaming mode), its fluid browsing
-(the render loop never blocks; Bubbletea's prototype stalled on per-key full-page
-glamour re-renders + re-fetching), and its purpose-built layout capability for the
-future Q&A streaming view outweighed the single-binary story. The bun-process cost is
-accepted; the real `mocho tui` (#9) can proceed from `opentui/`.
-
-The evaluation below (originally written as a Bubbletea-leaning recommendation) —
-the criteria table and the tradeoffs — still stands as the recorded comparison of the
-two candidates.
-
-The case for **Bubbletea** that the decision weighed: the deployment story and
-maturity. OpenTUI's advantages (streaming markdown, richer layout) are **implementable**
-in Bubbletea, whereas OpenTUI's **bun runtime as a separate process** is **structural**
+The case for **Bubbletea** turns on the deployment story and maturity, because the
+OpenTUI-only advantages (streaming markdown, richer layout) are **implementable** in
+Bubbletea, whereas OpenTUI's **bun runtime as a separate process** is **structural**
 and directly conflicts with a core PRD implementation decision: *"SPA built and served
 by Go via `go:embed` — one self-contained binary"* and *"TUI ... ships inside the mocho
 binary as `mocho tui`."* Introducing a bun dependency just for the terminal frontend
 makes running mocho meaningfully harder and is hard to reverse later.
 
 The case for **OpenTUI** is the richer, purpose-built renderer: tree-sitter syntax
-highlighting, OSC8 hyperlinks, auto-aligning tables, themes, and a `MarkdownRenderable`
+highlighting, OSC8 hyperlinks, auto-aligning tables,themes, and a `MarkdownRenderable`
 with a built-in **streaming** mode (sticky bottom-scroll) that is essentially tailor-made
 for the future Q&A streaming view — plus flexbox-style layout (`flexGrow`/`flexShrink`/
-`flexDirection`, absolute pos, z-index, opacity). It also won the hands-on feel: fluid
-`j`/`k` browsing vs Bubbletea stalling per keystroke.
+`flexDirection`, absolute pos, z-index, opacity). If you weight the chat/streaming UX and
+visual polish above the single-binary story, OpenTUI wins on those axes.
 
-Bubbletea additionally shares the server's language and toolchain (no runtime to
-install, no native Zig core to ship per-platform), and the Charm ecosystem is far more
-mature — the reasons it's kept as the fallback.
+Bubbletea also shares the server's language and toolchain (no runtime to install, no
+native Zig core to ship per-platform in a second package), and the Charm ecosystem is
+far more mature with a large community — lower long-term maintenance risk for a
+hobby/student app maintained by one person.
 
-The alternative the decision rejected: a `glamour`-rendered `viewport` with incremental
-append + manual sticky-bottom for streaming Q&A. Bounded extra work, but materially
-worse than OpenTUI's turnkey streaming renderer.
+If Bubbletea is chosen: the Q&A streaming view will be a `glamour`-rendered `viewport`
+with incremental append + a manual sticky-bottom behavior, instead of OpenTUI's turnkey
+streaming `MarkdownRenderable`. This is a known, bounded amount of extra work.
 
-Per the bake-off acceptance criteria, the **losing** candidate would normally be
-deleted, but it is deliberately **retained** here for later reference; both prototypes
-are kept and the `mocho tui` follow-up ticket (#9) proceeds on **OpenTUI**.
+Per the bake-off acceptance criteria, the **losing** prototype should be deleted once
+you've picked a winner. Until then, both live here for comparison and the `mocho tui`
+follow-up ticket (#9) is blocked on your decision.
